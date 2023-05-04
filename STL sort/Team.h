@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <random>
 
 class Team {
 public:
@@ -9,7 +10,6 @@ public:
 	int goal;
 	int lost_goal;
 	int points;
-
 public:
 
 	int count_points() {
@@ -17,16 +17,35 @@ public:
 	}
 
 	Team() {
-		win = 3;
-		draw = 2;
-		lose = 5;
-		goal = 2;
-		lost_goal = 6;
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<int> dis(0, 4);
+		std::uniform_int_distribution<int> dis_goal(0, 14);
+
+		win = dis(gen);
+		draw = dis(gen);
+		lose = dis(gen);
+		goal = std::uniform_int_distribution<int>(0, (2 * win) + draw)(gen);
+		lost_goal = std::uniform_int_distribution<int>(0, (2 * lose) + draw)(gen);
 		points = count_points();
 	}
 
-	bool operator<(const Team& other) const {
-		return win < other.win;
+	bool operator>(const Team& other) const {
+		if (points != other.points) {
+			return (points > other.points);
+		}
+		else if (win != other.win) {
+			return win > other.win;
+		}
+		else if (lose != other.lose) {
+			return lose < other.lose;
+		}
+		else if (goal != other.goal) {
+			return goal > other.goal;
+		}
+		else {
+			return lost_goal < other.lost_goal;
+		}
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Team& t) {
